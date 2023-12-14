@@ -1,0 +1,7 @@
+[requires]
+opencv/4.1.2
+base64/0.5.1
+
+[generators]
+CMakeDeps
+CMakeToolchain
