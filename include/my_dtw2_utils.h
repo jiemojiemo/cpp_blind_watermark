@@ -60,22 +60,22 @@ public:
 
   double *getCoeffs() { return coeffs_; }
 
-  int getCa(cv::Mat &cA) {
+  int getCaRef(cv::Mat &cA) {
     getWT2Coeffs(cA, "A");
     return 0;
   }
 
-  int getCH(cv::Mat &cH) {
+  int getChRef(cv::Mat &cH) {
     getWT2Coeffs(cH, "H");
     return 0;
   }
 
-  int getCV(cv::Mat &cV) {
+  int getCvRef(cv::Mat &cV) {
     getWT2Coeffs(cV, "V");
     return 0;
   }
 
-  int getCD(cv::Mat &cD) {
+  int getCdRef(cv::Mat &cD) {
     getWT2Coeffs(cD, "D");
     return 0;
   }
