@@ -36,14 +36,16 @@ public:
       auto block_index = 0;
 
       // 遍历每个 ca block
-      for (int x = 0; x < ca_block_shape[0];++x) {
-        for (int y = 0; y < ca_block_shape[1]; ++y) {
-          auto x_inx = x * m_block_shape[0];
-          auto y_inx = y * m_block_shape[1];
+      auto num_block_y = ca_block_shape[0];
+      auto num_block_x = ca_block_shape[1];
+      for(int x = 0; x < num_block_x; ++x){
+        for(int y = 0; y < num_block_y; ++y){
+          auto x_inx = x * m_block_shape[1];
+          auto y_inx = y * m_block_shape[0];
           auto rect = cv::Rect(x_inx, y_inx, m_block_shape[0], m_block_shape[1]);
           auto ca_block = ca_channel(rect);
           auto add_wm_block = blockAddWm(ca_block, block_index++);
-          if(x == 220 && y == 24 && c == 2){
+          if(x == 0 && y == 0 && c == 0){
             blockAddWm(ca_block, block_index);
           }
           add_wm_block.copyTo(ca_channel(rect));
@@ -126,15 +128,16 @@ private:
       auto &ca_channel = ca[c];
       auto block_index = 0;
       // 遍历每个 ca block
-      for (int x = 0; x < ca_block_shape[0];++x) {
-        for (int y = 0; y < ca_block_shape[1]; ++y) {
-          auto x_inx = x * m_block_shape[0];
-          auto y_inx = y * m_block_shape[1];
+      auto num_block_y = ca_block_shape[0];
+      auto num_block_x = ca_block_shape[1];
+      for(int x = 0; x < num_block_x; ++x){
+        for(int y = 0; y < num_block_y; ++y){
+          auto x_inx = x * m_block_shape[1];
+          auto y_inx = y * m_block_shape[0];
           auto rect = cv::Rect(x_inx, y_inx, m_block_shape[0], m_block_shape[1]);
           auto ca_block = ca_channel(rect);
           auto block_bit = blockGetWm(ca_block);
-          if(block_bit == 0){
-            std::cout << "x, y, rect: " << x << ", " << y << ", " << rect << std::endl;
+          if(x == 0 && y == 0 && c == 0){
             blockGetWm(ca_block);
           }
           wm_block_bits.at<uint8_t>(c, block_index++) = block_bit;

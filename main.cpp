@@ -6,7 +6,7 @@
 using namespace my_lib;
 
 void maintest() {
-  auto img_path = "/Users/user/Downloads/Lenna_(test_image).png";
+  auto img_path = "/Users/user/Downloads/ori_img.jpeg";
   cv::Mat img = cv::imread(img_path);
   auto wm_bits = BinaryUtils::asciiStrToBinArray("hello world");
   auto wm_bits2 = std::vector<uint8_t>{1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
