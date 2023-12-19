@@ -6,7 +6,7 @@
 using namespace my_lib;
 
 void maintest() {
-  auto img_path = "/Users/user/Downloads/Lenna_(test_image).png";
+  auto img_path = "/Users/user/Downloads/ori_img.jpeg";
   cv::Mat img = cv::imread(img_path);
   auto wm_bits = BinaryUtils::asciiStrToBinArray("hello world");
   auto xx = cv::Mat(wm_bits);
@@ -49,8 +49,25 @@ void yuvtest() {
   cv::imwrite("yuv.png", temp);
 }
 
+void cvTest()
+{
+  cv::Mat inputs = (cv::Mat_<float>(1,4) << 1.0, 2.0, 3.0, 4.0);
+        std::cout << inputs << std::endl;
+
+  // is_class01 是一个 CV_8UC1 的一维矩阵
+  cv::Mat is_class01 = (cv::Mat_<uchar>(1,4) << 0, 255, 0, 255);
+
+  cv::Mat is_255 = cv::Mat::zeros(is_class01.size(), CV_8UC1);
+  cv::compare(is_class01, 255, is_255, cv::CMP_EQ);
+  std::cout << is_255 << std::endl;
+  cv::Mat result = inputs & is_255;
+
+  std::cout << result << std::endl;
+}
+
 int main() {
   //  yuvtest();
   maintest();
+//  cvTest();
   return 0;
 }
