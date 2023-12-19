@@ -6,17 +6,15 @@
 using namespace my_lib;
 
 void maintest() {
-  auto img_path = "/Users/user/Downloads/ori_img.jpeg";
+  auto img_path = "/Users/user/Downloads/Lenna_(test_image).png";
   cv::Mat img = cv::imread(img_path);
   auto wm_bits = BinaryUtils::asciiStrToBinArray("hello world");
-  auto wm_bits2 = std::vector<uint8_t>{1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-  auto xx = cv::Mat(wm_bits2);
-//  std::cout << xx << std::endl;
-  //  std::cout << wm_bits.size() << std::endl;
+  auto xx = cv::Mat(wm_bits);
+  std::cout << "wm_bits size: " << wm_bits.size() << std::endl;
 
   auto core = std::make_unique<BindWatermarkCoreV0>();
   core->readImage(img);
-  core->readWatermark(wm_bits2);
+  core->readWatermark(wm_bits);
   auto embed_img = core->embed();
   std::cout << "embed_img size: " << embed_img.size() << std::endl;
 
@@ -24,7 +22,9 @@ void maintest() {
 
   std::cout << "-------------------------------------\n";
   cv::Mat emb_img = cv::imread("embed_img.png");
-  core->extract(emb_img, wm_bits.size());
+  auto extract_bits = core->extract(emb_img, wm_bits.size());
+  auto extract_str = BinaryUtils::binArrayToAsciiStr(extract_bits);
+  std::cout << "extract_str: " << extract_str << std::endl;
 }
 
 void yuvtest() {
@@ -50,7 +50,7 @@ void yuvtest() {
 }
 
 int main() {
-//  yuvtest();
+  //  yuvtest();
   maintest();
   return 0;
 }

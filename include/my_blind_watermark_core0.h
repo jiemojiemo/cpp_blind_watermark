@@ -74,10 +74,10 @@ public:
 
   std::vector<uint8_t> extract(const cv::Mat &img, int wm_size) override {
     cv::Mat wm_block_bits = extractRaw(img, wm_size);
-    std::cout << "wm_block_bits:\n" << wm_block_bits << std::endl;
-    cv::Mat wm_block_avg = extract_avg(wm_block_bits, wm_size);
-    std::cout << "wm_block_avg:\n" << wm_block_avg << std::endl;
-    return std::vector<uint8_t>();
+//    std::cout << "wm_block_bits:\n" << wm_block_bits << std::endl;
+    auto wm_block_avg = extract_avg(wm_block_bits, wm_size);
+//    std::cout << "wm_block_avg:\n" << wm_block_avg << std::endl;
+    return wm_block_avg;
   }
 
   const cv::Mat &getImageArray() const { return m_img; }
@@ -105,17 +105,18 @@ private:
                 << " channels" << std::endl;
     }
   }
-  cv::Mat extract_avg(const cv::Mat &wm_block_bit, int wm_size) {
-    cv::Mat wm_avg = cv::Mat::zeros(wm_size, 1, CV_32F);
+  std::vector<uint8_t> extract_avg(const cv::Mat &wm_block_bit, int wm_size) {
+    std::vector<uint8_t> result(wm_size, 0);
+    cv::Mat wm_avg = cv::Mat::zeros(wm_size, 1, CV_64F);
     for (int i = 0; i < wm_size; i++) {
       cv::Mat sub_mat;
       for (int j = i; j < wm_block_bit.cols; j += wm_size) {
         sub_mat.push_back(wm_block_bit.col(j));
       }
       cv::Scalar avg_scalar = cv::mean(sub_mat);
-      wm_avg.at<double>(i, 0) = avg_scalar[0];
+      result[i] = static_cast<uint8_t>(avg_scalar[0]);
     }
-    return wm_avg;
+    return result;
   }
 
   cv::Mat extractRaw(const cv::Mat &img, int wm_size) {
