@@ -2,31 +2,32 @@
 // Created by user on 12/16/23.
 //
 
-#ifndef BLINDWATERMARKTEST_MY_BLIND_WATERMARK_CORE0_H
-#define BLINDWATERMARKTEST_MY_BLIND_WATERMARK_CORE0_H
-#include "my_dtw2_utils.h"
-#include "my_i_blind_watermark_core.h"
+#ifndef BLINDWATERMARKTEST_BLIND_WATERMARK_CORE0_H
+#define BLINDWATERMARKTEST_BLIND_WATERMARK_CORE0_H
+#include "dtw2_utils.h"
+#include "i_blind_watermark_core.h"
 #include <fstream>
-namespace my_lib {
+namespace re {
 class BindWatermarkCoreV0 : public IBindWatermarkCore {
 public:
-  BindWatermarkCoreV0(std::array<int, 2> block_shape = {4, 4})
-      : m_block_shape(std::move(block_shape)) {}
+  explicit BindWatermarkCoreV0(std::array<int, 2> block_shape = {4, 4}) : m_block_shape(block_shape) {}
   ~BindWatermarkCoreV0() override = default;
-  void readImage(const cv::Mat &img) override {
+  void readImage(const cv::Mat &img) override
+  {
     readImageWithAlpha(img);
     preprocessForYUV();
     dwt2Process();
   }
-  void readWatermark(const std::vector<uint8_t> &wm_bits) override {
+  void readWatermark(const std::vector<uint8_t> &wm_bits) override
+  {
     m_wm_bits = wm_bits;
     m_wm_size = wm_bits.size();
   }
-  cv::Mat embed() override {
+  cv::Mat embed() override
+  {
     auto block_num = ca_block_shape[0] * ca_block_shape[1];
     if (m_wm_size > block_num) {
-      printf("水印数据太大，嵌入失败，最多可嵌入 %d kb，水印数据大小 %d kb",
-             block_num / 1000, m_wm_size / 1000);
+      printf("水印数据太大，嵌入失败，最多可嵌入 %d kb，水印数据大小 %d kb", block_num / 1000, m_wm_size / 1000);
       return {};
     }
 
@@ -43,8 +44,7 @@ public:
         for (int y = 0; y < num_block_y; ++y) {
           auto x_inx = x * m_block_shape[1];
           auto y_inx = y * m_block_shape[0];
-          auto rect =
-              cv::Rect(x_inx, y_inx, m_block_shape[0], m_block_shape[1]);
+          auto rect = cv::Rect(x_inx, y_inx, m_block_shape[0], m_block_shape[1]);
           auto ca_block = ca_channel(rect);
           auto add_wm_block = blockAddWm(ca_block, block_index++);
           if (x == 0 && y == 0 && c == 0) {
@@ -68,24 +68,13 @@ public:
     return embed_img;
   }
 
-  void saveMatToTxt(cv::Mat &matrix, const std::string &filename) {
-    std::ofstream ofs(filename);
-    if (ofs.is_open()) {
-      ofs << matrix;
-    }
-    ofs.close();
-  }
-
-  std::vector<uint8_t> extract(const cv::Mat &img, int wm_size) override {
+  std::vector<uint8_t> extract(const cv::Mat &img, int wm_size) override
+  {
     cv::Mat wm_block_bits = extractRaw(img, wm_size);
-    saveMatToTxt(wm_block_bits, "wm_block_bits.txt");
     auto wm_block_avg = extract_avg(wm_block_bits, wm_size);
-    saveMatToTxt(wm_block_avg, "wm_block_avg.txt");
     auto k = one_dim_kmeans(wm_block_avg);
-    saveMatToTxt(k, "k.txt");
     std::vector<uint8_t> result(k.rows, 0);
-    for(int i = 0; i < k.rows; ++i)
-    {
+    for (int i = 0; i < k.rows; ++i) {
       result[i] = k.at<uint8_t>(i, 0) > 0 ? 1 : 0;
     }
     return result;
@@ -95,24 +84,8 @@ public:
   const cv::Mat &getImageYUVArray() const { return m_imgYUV; }
 
 private:
-  void printYUV(cv::Mat &yuv_img, const std::string &prefix) {
-    std::vector<cv::Mat> yuv_channels;
-    cv::split(yuv_img, yuv_channels);
-  }
-  void printType(cv::Mat &m) {
-    if (m.type() == CV_8UC3) {
-      std::cout << "The matrix is a 3-channel image (CV_8UC3)" << std::endl;
-    } else if (m.type() == CV_8UC1) {
-      std::cout << "The matrix is a single-channel image (CV_8UC1)"
-                << std::endl;
-    } else {
-      int depth = CV_MAT_DEPTH(m.type());
-      int channels = CV_MAT_CN(m.type());
-      std::cout << "The matrix has depth " << depth << " and " << channels
-                << " channels" << std::endl;
-    }
-  }
-  cv::Mat extract_avg(const cv::Mat &wm_block_bit, int wm_size) {
+  static cv::Mat extract_avg(const cv::Mat &wm_block_bit, int wm_size)
+  {
     cv::Mat wm_avg = cv::Mat::zeros(wm_size, 1, CV_64F);
     for (int i = 0; i < wm_size; i++) {
       cv::Mat sub_mat;
@@ -125,64 +98,30 @@ private:
     return wm_avg;
   }
 
-  cv::Mat one_dim_kmeans2(cv::Mat inputs) {
-    double threshold = 0;
-    double e_tol = 1e-6;
-    std::vector<double> center = {inputs.at<double>(0, 0),
-                                  inputs.at<double>(0, 0)};
-    // 1. 初始化中心点
-    for (int i = 0; i < 300; i++) {
-      threshold = (center[0] + center[1]) / 2;
-      cv::Mat is_class01 = inputs > threshold;
-      // 2. 检查所有点与这k个点之间的距离，每个点归类到最近的中心
-      double mean0 = 0, mean1 = 0;
-      int count0 = 0, count1 = 0;
-      for (int j = 0; j < inputs.rows; j++) {
-        if (is_class01.at<bool>(j, 0)) {
-          mean1 += inputs.at<double>(j, 0);
-          count1++;
-        } else {
-          mean0 += inputs.at<double>(j, 0);
-          count0++;
-        }
-      }
-      center[0] = mean0 / count0;
-      center[1] = mean1 / count1; // 3. 重新找中心点
-      if (abs((center[0] + center[1]) / 2 - threshold) < e_tol) { // 4. 停止条件
-        threshold = (center[0] + center[1]) / 2;
-        break;
-      }
-    }
-
-    cv::Mat is_class01 = inputs > threshold;
-    return is_class01;
-  }
-
-  std::pair<double, double> calcMeans(cv::Mat& input, cv::Mat& is_class01)
+  std::pair<double, double> calcMeans(cv::Mat &input, cv::Mat &is_class01)
   {
     auto num_ele = is_class01.rows;
     auto num_class01 = cv::countNonZero(is_class01);
     auto num_class00 = num_ele - num_class01;
     double sum0 = 0;
     double sum1 = 0;
-    for(int i = 0 ;i < num_ele; ++i)
-    {
-      if(is_class01.at<uint8_t>(i, 0) > 0)
-      {
+    for (int i = 0; i < num_ele; ++i) {
+      if (is_class01.at<uint8_t>(i, 0) > 0) {
         sum1 += input.at<double>(i, 0);
-      }else{
+      } else {
         sum0 += input.at<double>(i, 0);
       }
     }
-    return {sum0/num_class00, sum1/num_class01};
+    return {sum0 / num_class00, sum1 / num_class01};
   }
 
-  cv::Mat one_dim_kmeans(cv::Mat &inputs) {
+  cv::Mat one_dim_kmeans(cv::Mat &inputs)
+  {
     double threshold = 0;
     const double e_tol = 1e-6;
     double minVal, maxVal;
     cv::minMaxLoc(inputs, &minVal, &maxVal);
-    std::vector<double> center = {minVal, maxVal}; // 1. 初始化中心点
+    std::vector<double> center = {minVal, maxVal};  // 1. 初始化中心点
 
     for (int i = 0; i < 300; i++) {
       threshold = (center[0] + center[1]) / 2;
@@ -190,23 +129,21 @@ private:
 
       std::tie(center[0], center[1]) = calcMeans(inputs, is_class01);
 
-      if (std::abs((center[0] + center[1]) / 2 - threshold) <
-          e_tol) { // 4. 停止条件
+      if (std::abs((center[0] + center[1]) / 2 - threshold) < e_tol) {  // 4. 停止条件
         threshold = (center[0] + center[1]) / 2;
         break;
       }
     }
 
     cv::Mat is_class01 = inputs > threshold;
-    std::cout << "is_class01:\n" << is_class01 << std::endl;
     return is_class01;
   }
 
-  cv::Mat extractRaw(const cv::Mat &img, int wm_size) {
+  cv::Mat extractRaw(const cv::Mat &img, int wm_size)
+  {
     readImage(img);
     auto block_num = ca_block_shape[0] * ca_block_shape[1];
-    cv::Mat wm_block_bits =
-        cv::Mat::zeros(m_imgYUV.channels(), block_num, CV_8U);
+    cv::Mat wm_block_bits = cv::Mat::zeros(m_imgYUV.channels(), block_num, CV_8U);
 
     for (int c = 0; c < m_imgYUV.channels(); c++) {
       auto &ca_channel = ca[c];
@@ -218,8 +155,7 @@ private:
         for (int y = 0; y < num_block_y; ++y) {
           auto x_inx = x * m_block_shape[1];
           auto y_inx = y * m_block_shape[0];
-          auto rect =
-              cv::Rect(x_inx, y_inx, m_block_shape[0], m_block_shape[1]);
+          auto rect = cv::Rect(x_inx, y_inx, m_block_shape[0], m_block_shape[1]);
           auto ca_block = ca_channel(rect);
           auto block_bit = blockGetWm(ca_block);
           if (x == 0 && y == 0 && c == 0) {
@@ -232,44 +168,40 @@ private:
 
     return wm_block_bits;
   }
-  cv::Mat blockAddWm(const cv::Mat &block, int block_index) {
+  cv::Mat blockAddWm(const cv::Mat &block, int block_index)
+  {
     auto b = m_wm_bits[block_index % m_wm_size];
-    if (block_index < 10) {
-      //      printf("xx %d %d\n", block_index, b);
-    }
     cv::Mat dct_block;
     cv::dct(block, dct_block);
 
     cv::Mat u, s, vt;
-    cv::SVD::compute(dct_block, s, u, vt); // 计算SVD
+    cv::SVD::compute(dct_block, s, u, vt);  // 计算SVD
 
     auto s0 = s.at<double>(0, 0);
     auto s00 = (std::floor(s0 / d1) + 0.25 + 0.5 * b) * d1;
     s.at<double>(0, 0) = s00;
 
-    cv::Mat diag_s = cv::Mat::diag(s); // 创建对角矩阵
-    cv::Mat result = u * diag_s * vt;  // 矩阵乘法
+    cv::Mat diag_s = cv::Mat::diag(s);  // 创建对角矩阵
+    cv::Mat result = u * diag_s * vt;   // 矩阵乘法
 
     cv::Mat idct_result;
-    cv::idct(result, idct_result); // 逆DCT变换
+    cv::idct(result, idct_result);  // 逆DCT变换
     return idct_result;
   }
 
-  uint8_t blockGetWm(const cv::Mat &block) {
+  uint8_t blockGetWm(const cv::Mat &block)
+  {
     cv::Mat dct_block, u, s, v;
-    cv::dct(block, dct_block);            // 对块进行 DCT 变换
-    cv::SVD::compute(dct_block, s, u, v); // 对 DCT 变换后的块进行 SVD 分解
-    bool bb = false;
-    if (bb) {
-      std::cout << block << std::endl;
-    }
+    cv::dct(block, dct_block);             // 对块进行 DCT 变换
+    cv::SVD::compute(dct_block, s, u, v);  // 对 DCT 变换后的块进行 SVD 分解
     auto t0 = s.at<double>(0, 0);
     double s0_mod_d1 = std::fmod(t0, d1);
     uint8_t wm = (s0_mod_d1 > d1 / 2) ? 1 : 0;
     return wm;
   }
 
-  void preprocessForYUV() {
+  void preprocessForYUV()
+  {
     cv::cvtColor(m_img, m_imgYUV, cv::COLOR_BGR2YUV);
 
     // 将 YUV 大小填充至偶数
@@ -278,18 +210,17 @@ private:
     int left = 0;
     int right = m_img.cols % 2;
 
-    cv::copyMakeBorder(m_imgYUV, m_imgYUV, top, bottom, left, right,
-                       cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+    cv::copyMakeBorder(m_imgYUV, m_imgYUV, top, bottom, left, right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 
     m_imgYUV.convertTo(m_imgYUV, CV_64F);
     //    printYUV(m_imgYUV, "yuv no change:");
   }
-  void dwt2Process() {
+  void dwt2Process()
+  {
     auto ca_shape_rows = m_imgYUV.rows / 2;
     auto ca_shape_cols = m_imgYUV.cols / 2;
-    ca_block_shape = cv::Vec4i{ca_shape_rows / m_block_shape[0],
-                               ca_shape_cols / m_block_shape[1],
-                               m_block_shape[0], m_block_shape[1]};
+    ca_block_shape = cv::Vec4i{ca_shape_rows / m_block_shape[0], ca_shape_cols / m_block_shape[1], m_block_shape[0],
+                               m_block_shape[1]};
 
     std::vector<cv::Mat> channels;
     cv::split(m_imgYUV, channels);
@@ -316,28 +247,24 @@ private:
     }
   }
 
-  void readImageWithAlpha(const cv::Mat &img) {
+  void readImageWithAlpha(const cv::Mat &img)
+  {
     if (img.channels() == 4) {
       cv::cvtColor(img, m_img, cv::COLOR_BGRA2BGR);
     } else {
       m_img = img.clone();
     }
-
-    m_img_width = m_img.cols;
-    m_img_height = m_img.rows;
   }
 
   std::vector<std::unique_ptr<DTW2Utils>> dwt2UtilsArray;
 
   std::array<int, 2> m_block_shape;
-  int d1 = 36;
+  int d1 = 50;
   std::vector<uint8_t> m_wm_bits;
-  size_t m_wm_size;
+  size_t m_wm_size{};
 
   cv::Mat m_img;
   cv::Mat m_imgYUV;
-  size_t m_img_width;
-  size_t m_img_height;
 
   cv::Vec4i ca_block_shape;
   std::vector<cv::Mat> ca;
@@ -347,4 +274,4 @@ private:
 };
 } // namespace my_lib
 
-#endif // BLINDWATERMARKTEST_MY_BLIND_WATERMARK_CORE0_H
+#endif // BLINDWATERMARKTEST_BLIND_WATERMARK_CORE0_H

@@ -2,16 +2,16 @@
 // Created by user on 12/15/23.
 //
 
-#ifndef BLINDWATERMARKTEST_MY_BINARY_UTILS_H
-#define BLINDWATERMARKTEST_MY_BINARY_UTILS_H
+#ifndef BLINDWATERMARKTEST_BINARY_UTILS_H
+#define BLINDWATERMARKTEST_BINARY_UTILS_H
 
-#include "my_base64codec_utils.h"
+#include "base64codec_utils.h"
 #include <bitset>
 #include <climits>
 #include <string>
 #include <vector>
 
-namespace my_lib {
+namespace re {
 class BinaryUtils {
 public:
   static std::vector<uint8_t> asciiStrToBinArray(const std::string &str) {
@@ -49,4 +49,4 @@ public:
 };
 } // namespace my_lib
 
-#endif // BLINDWATERMARKTEST_MY_BINARY_UTILS_H
+#endif // BLINDWATERMARKTEST_BINARY_UTILS_H

@@ -1,11 +1,11 @@
 //
 // Created by user on 12/15/23.
 //
+#include "dtw2_utils.h"
 #include <gmock/gmock.h>
-#include "my_dtw2_utils.h"
 
 using namespace testing;
-using namespace my_lib;
+using namespace re;
 class AWaveletUtils : public Test {
 public:
   DTW2Utils u;

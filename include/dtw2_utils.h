@@ -2,12 +2,12 @@
 // Created by user on 12/16/23.
 //
 
-#ifndef BLINDWATERMARKTEST_MY_DTW2_UTILS_H
-#define BLINDWATERMARKTEST_MY_DTW2_UTILS_H
+#ifndef BLINDWATERMARKTEST_DTW2_UTILS_H
+#define BLINDWATERMARKTEST_DTW2_UTILS_H
 #include "wavelib.h"
 #include <opencv4/opencv2/opencv.hpp>
 
-namespace my_lib {
+namespace re {
 class DTW2Utils {
 public:
   DTW2Utils() : obj_(nullptr, ::wave_free), wt_(nullptr, ::wt2_free) {}
@@ -96,4 +96,4 @@ private:
 } // namespace my_lib
 
 
-#endif // BLINDWATERMARKTEST_MY_DTW2_UTILS_H
+#endif // BLINDWATERMARKTEST_DTW2_UTILS_H

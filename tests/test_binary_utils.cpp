@@ -2,11 +2,11 @@
 // Created by user on 12/14/23.
 //
 
+#include "binary_utils.h"
 #include <gmock/gmock.h>
-#include "my_binary_utils.h"
 
 using namespace testing;
-using namespace my_lib;
+using namespace re;
 
 class ABinaryUtils : public Test {
 public:

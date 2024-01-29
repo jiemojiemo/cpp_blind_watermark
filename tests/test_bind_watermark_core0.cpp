@@ -2,8 +2,8 @@
 // Created by user on 12/16/23.
 //
 
+#include "blind_watermark_core0.h"
 #include <gmock/gmock.h>
-#include "my_blind_watermark_core0.h"
 
 using namespace testing;
 class ABlindWatermarkCore : public Test {
@@ -22,7 +22,7 @@ public:
 TEST_F(ABlindWatermarkCore, CanReadARGBImageArray) {
   cv::Mat img = createARGBImageArray(img_rows, img_cols);
 
-  auto core = std::make_unique<my_lib::BindWatermarkCoreV0>();
+  auto core = std::make_unique<re::BindWatermarkCoreV0>();
   core->readImage(img);
 
   ASSERT_THAT(core->getImageArray().channels(), Eq(3));
@@ -35,7 +35,7 @@ TEST_F(ABlindWatermarkCore, CanEmbed)
   cv::Mat img = createARGBImageArray(img_rows, img_cols);
   auto wm_bits = std::vector<uint8_t>{1, 0, 1, 0, 1, 0, 1, 0};
 
-  auto core = std::make_unique<my_lib::BindWatermarkCoreV0>();
+  auto core = std::make_unique<re::BindWatermarkCoreV0>();
   core->readImage(img);
   core->readWatermark(wm_bits);
   auto embed_img = core->embed();

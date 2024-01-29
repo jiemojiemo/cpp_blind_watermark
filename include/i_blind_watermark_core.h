@@ -2,12 +2,11 @@
 // Created by user on 12/16/23.
 //
 
-#ifndef BLINDWATERMARKTEST_MY_I_BLIND_WATERMARK_CORE_H
-#define BLINDWATERMARKTEST_MY_I_BLIND_WATERMARK_CORE_H
+#ifndef BLINDWATERMARKTEST_I_BLIND_WATERMARK_CORE_H
+#define BLINDWATERMARKTEST_I_BLIND_WATERMARK_CORE_H
 #include <opencv4/opencv2/opencv.hpp>
 #include <vector>
-namespace my_lib
-{
+namespace re {
 class IBindWatermarkCore {
 public:
   virtual ~IBindWatermarkCore() = default;
@@ -19,4 +18,4 @@ public:
 };
 }
 
-#endif // BLINDWATERMARKTEST_MY_I_BLIND_WATERMARK_CORE_H
+#endif // BLINDWATERMARKTEST_I_BLIND_WATERMARK_CORE_H

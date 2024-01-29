@@ -2,11 +2,11 @@
 // Created by user on 12/14/23.
 //
 
-#ifndef BLINDWATERMARKTEST_MY_BASE64CODEC_UTILS_H
-#define BLINDWATERMARKTEST_MY_BASE64CODEC_UTILS_H
+#ifndef BLINDWATERMARKTEST_BASE64CODEC_UTILS_H
+#define BLINDWATERMARKTEST_BASE64CODEC_UTILS_H
 #include "libbase64.h"
 #include <string>
-namespace my_lib {
+namespace re {
 class Base64CodecUtils {
 public:
   static std::string Encode(const std::string &str) {
@@ -32,4 +32,4 @@ public:
 } // namespace my_lib
 
 
-#endif // BLINDWATERMARKTEST_MY_BASE64CODEC_UTILS_H
+#endif // BLINDWATERMARKTEST_BASE64CODEC_UTILS_H
