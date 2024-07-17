@@ -1,5 +1,6 @@
 # Blind Watermark Algorithm C/Cpp Implementation
 This is a code repository implementing the Blind watermark algorithm using c/cpp, including the algorithm source code and demo examples.
+More details in [盲水印、暗水印（Blind Watermark）算法简明教程：算法原理、流程以及基于C/C++ 的代码实现](https://blog.csdn.net/weiwei9363/article/details/136175834)
 
 # Features
 + Written in C and C++ languages
@@ -16,11 +17,13 @@ This project uses cmake and conan for building. You need to [install conan](http
 You can use the following commands to build:
 
 ```bash
+git clone https://github.com/jiemojiemo/cpp_blind_watermark
+cd cpp_blind_watermark
+git submodule update --init --recursive
 mkdir build
-conan install . --output-folder=./build --build=missing --settings=build_type=Debug
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-make
+conan install . --output-folder=./build --build=missing --settings=build_type=Release
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=./build/conan_toolchain.cmake -B build -S .
+cmake --build build -- -j 10
 ```
 
 # Usage
